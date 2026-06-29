@@ -1,0 +1,118 @@
+:root {
+  /* Palette — Herbst / Hochzeit */
+  --paper:   #efe6d3;   /* Beige Papier */
+  --paper-2: #e7dcc4;   /* tieferes Beige */
+  --card:    #f4ecdc;   /* Karten */
+  --ink:     #3a2c1d;   /* Dunkelbraun (Text) */
+  --brown:   #6f4f30;   /* Walnuss */
+  --olive:   #5d6b43;   /* Herbstgruen */
+  --moss:    #43512f;   /* tiefes Gruen */
+  --gold:    #b58a45;   /* Ocker / Gold */
+  --clay:    #a9603f;   /* Terrakotta-Akzent */
+  --line:    rgba(58, 44, 29, 0.16);
+
+  --font-serif:  'Cormorant Garamond', Georgia, serif;
+  --font-script: 'Pinyon Script', cursive;
+  --font-label:  'Jost', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+/* Hintergrund: Lusthaus-Bild (public/background.jpg ersetzbar) + Beige-Wash */
+body {
+  background:
+    linear-gradient(rgba(231, 220, 196, 0.78), rgba(231, 220, 196, 0.9)),
+    url('/background.jpg'),
+    url('/background.svg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: var(--paper-2);
+}
+
+#app { min-height: 100dvh; display: flex; flex-direction: column; }
+
+h1, h2, h3 { font-weight: 600; margin: 0; line-height: 1.05; }
+
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; }
+
+/* Micro-Labels bleiben aufrecht & ruhig fuer Lesbarkeit */
+.eyebrow {
+  font-family: var(--font-label);
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+
+.script { font-family: var(--font-script); font-style: normal; line-height: 1; }
+
+.btn {
+  font-family: var(--font-label);
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: 999px;
+  padding: 0.95rem 1.7rem;
+  font-size: 0.95rem;
+  background: var(--moss);
+  color: var(--paper);
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; filter: grayscale(0.4); cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--brown); }
+.btn-gold { background: var(--gold); color: #2c2010; }
+
+.field {
+  width: 100%;
+  font-family: var(--font-serif);
+  font-style: italic;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  padding: 0.95rem 1.1rem;
+  font-size: 1.15rem;
+  outline: none;
+}
+.field:focus { border-color: var(--olive); }
+.field::placeholder { color: var(--brown); opacity: 0.6; }
+
+.stamp {
+  font-family: var(--font-label);
+  font-style: normal;
+  letter-spacing: 0.18em;
+  color: var(--brown);
+}
+
+/* Foto im Creme-Passepartout (statt Filmstreifen) */
+.frame {
+  background: var(--card);
+  padding: 8px 8px 10px;
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(58, 44, 29, 0.16);
+}
+.frame img { display: block; width: 100%; border-radius: 2px; }
+
+.fade-enter-active { transition: opacity 0.4s ease; }
+.fade-enter-from { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
