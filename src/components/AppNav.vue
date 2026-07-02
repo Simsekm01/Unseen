@@ -1,13 +1,28 @@
 <script setup>
+<<<<<<< HEAD
 import { RouterLink } from 'vue-router'
+=======
+import { computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
+
+const route = useRoute()
+const slug = computed(() => route.params.slug || '')
+>>>>>>> cef553901371bf220774623f8c092096541acc20
 </script>
 
 <template>
   <nav class="nav">
+<<<<<<< HEAD
     <RouterLink to="/shoot" class="tab"><span class="ic">◉</span><span>Kamera</span></RouterLink>
     <RouterLink to="/roll" class="tab"><span class="ic">❏</span><span>Album</span></RouterLink>
     <RouterLink to="/gallery" class="tab"><span class="ic">❖</span><span>Galerie</span></RouterLink>
     <RouterLink to="/games" class="tab"><span class="ic">♛</span><span>Spiele</span></RouterLink>
+=======
+    <RouterLink :to="`/${slug}/shoot`" class="tab"><span class="ic">◉</span><span>Kamera</span></RouterLink>
+    <RouterLink :to="`/${slug}/roll`" class="tab"><span class="ic">❏</span><span>Album</span></RouterLink>
+    <RouterLink :to="`/${slug}/gallery`" class="tab"><span class="ic">❖</span><span>Galerie</span></RouterLink>
+    <RouterLink :to="`/${slug}/voting`" class="tab"><span class="ic">♥</span><span>Voting</span></RouterLink>
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   </nav>
 </template>
 

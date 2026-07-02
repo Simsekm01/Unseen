@@ -1,9 +1,17 @@
 {
+<<<<<<< HEAD
   "name": "kaycee-mustafa-disposable",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "description": "Einweg-Kamera-App fuer die Hochzeit von Kaycee & Mustafa (02.09.2026)",
+=======
+  "name": "unseen-platform",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Unseen — Multi-Hochzeits-Plattform mit digitaler Einwegkamera",
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   "scripts": {
     "dev": "vite",
     "build": "vite build",

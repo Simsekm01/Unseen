@@ -22,10 +22,18 @@ html, body {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-serif);
+<<<<<<< HEAD
   font-style: italic;          /* kursiv als Grundton */
   font-size: 18px;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
+=======
+  font-style: italic;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+>>>>>>> cef553901371bf220774623f8c092096541acc20
 }
 
 /* Hintergrund: Lusthaus-Bild (public/background.jpg ersetzbar) + Beige-Wash */

@@ -7,7 +7,11 @@ defineProps({
 
 <template>
   <figure class="ff">
+<<<<<<< HEAD
     <div class="frame"><img :src="src" loading="lazy" alt="" /></div>
+=======
+    <div class="frame"><img :src="src" loading="lazy" decoding="async" alt="" /></div>
+>>>>>>> cef553901371bf220774623f8c092096541acc20
     <figcaption v-if="index !== null" class="num stamp">№ {{ String(index).padStart(2, '0') }}</figcaption>
   </figure>
 </template>

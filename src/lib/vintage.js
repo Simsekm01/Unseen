@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 // vintage.js — warmer Film-Look + eingebrannter, dezenter Datumsstempel.
 // Input: HTMLCanvasElement (roher Frame). Output: Promise<Blob> (jpeg).
 
 import { EVENT, dateStamp } from '../config.js'
+=======
+import { DEFAULTS, dateStamp } from '../config.js'
+>>>>>>> cef553901371bf220774623f8c092096541acc20
 
 function curve(v, lift, gain) {
   let x = v / 255
@@ -21,7 +25,11 @@ export async function applyVintage(srcCanvas, opts = {}) {
     stamp = true,
     grain = 0.07,
     leak = true,
+<<<<<<< HEAD
     quality = EVENT.jpegQuality,
+=======
+    quality = DEFAULTS.jpegQuality,
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   } = opts
 
   const w = srcCanvas.width
@@ -32,7 +40,10 @@ export async function applyVintage(srcCanvas, opts = {}) {
   const ctx = canvas.getContext('2d', { willReadFrequently: true })
   ctx.drawImage(srcCanvas, 0, 0, w, h)
 
+<<<<<<< HEAD
   // Tonkurve + Warmth + dezentes Split-Toning + leichte Entsaettigung
+=======
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   const img = ctx.getImageData(0, 0, w, h)
   const d = img.data
   for (let i = 0; i < d.length; i += 4) {
@@ -62,7 +73,11 @@ export async function applyVintage(srcCanvas, opts = {}) {
   ctx.fillStyle = vg
   ctx.fillRect(0, 0, w, h)
 
+<<<<<<< HEAD
   // dezenter Light-Leak
+=======
+  // Light-Leak
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   if (leak) {
     ctx.save()
     ctx.globalCompositeOperation = 'screen'
@@ -76,7 +91,11 @@ export async function applyVintage(srcCanvas, opts = {}) {
     ctx.restore()
   }
 
+<<<<<<< HEAD
   // warmer Gesamt-Tint
+=======
+  // Gesamt-Tint
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   ctx.save()
   ctx.globalCompositeOperation = 'soft-light'
   ctx.fillStyle = 'rgba(210,160,90,0.10)'
@@ -94,7 +113,11 @@ export async function applyVintage(srcCanvas, opts = {}) {
     ctx.putImageData(gi, 0, 0)
   }
 
+<<<<<<< HEAD
   // Datumsstempel — elegant, warmes Creme, kursive Serife
+=======
+  // Datumsstempel
+>>>>>>> cef553901371bf220774623f8c092096541acc20
   if (stamp) {
     try { if (document.fonts?.ready) await document.fonts.ready } catch {}
     const text = dateStamp()
@@ -114,3 +137,29 @@ export async function applyVintage(srcCanvas, opts = {}) {
 
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/jpeg', quality))
 }
+<<<<<<< HEAD
+=======
+
+export function applyLiveVintage(ctx, w, h) {
+  ctx.save()
+  ctx.globalCompositeOperation = 'soft-light'
+  ctx.fillStyle = 'rgba(210,155,80,0.18)'
+  ctx.fillRect(0, 0, w, h)
+  ctx.restore()
+
+  ctx.save()
+  ctx.globalCompositeOperation = 'saturation'
+  ctx.fillStyle = 'rgba(128,128,128,0.12)'
+  ctx.fillRect(0, 0, w, h)
+  ctx.restore()
+
+  const vg = ctx.createRadialGradient(
+    w / 2, h / 2, Math.min(w, h) * 0.34,
+    w / 2, h / 2, Math.max(w, h) * 0.75,
+  )
+  vg.addColorStop(0, 'rgba(0,0,0,0)')
+  vg.addColorStop(1, 'rgba(40,26,8,0.30)')
+  ctx.fillStyle = vg
+  ctx.fillRect(0, 0, w, h)
+}
+>>>>>>> cef553901371bf220774623f8c092096541acc20
