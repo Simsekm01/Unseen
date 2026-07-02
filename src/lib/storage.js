@@ -1,201 +1,206 @@
-<<<<<<< HEAD
-// storage.js — eine API, zwei Backends (lokal / Supabase).
-import { EVENT } from '../config.js'
-=======
-import { activeWedding, DEFAULTS } from '../config.js'
->>>>>>> cef553901371bf220774623f8c092096541acc20
-import { idb } from './db.js'
-import { supabase, hasSupabase } from './supabase.js'
+import { activeWedding, DEFAULTS } from '../config.js';
+import { idb } from './db.js';
+import { supabase, hasSupabase } from './supabase.js';
 
 const uid = () =>
-  (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2))
+  crypto.randomUUID
+    ? crypto.randomUUID()
+    : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
 
-const norm = (s) => s.trim().toLowerCase()
+const norm = (s) => s.trim().toLowerCase();
+
+// Die admin_register/admin_login RPCs liefern je nach Supabase-Deployment
+// mal eine reine UUID, mal ein { id, username, email } JSON-Objekt zurueck.
+// extractId() normalisiert das auf eine reine ID, damit owner_id/admin_id
+// nie versehentlich ein Objekt oder Array wird.
+function extractId(val) {
+  if (!val) return null;
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) return extractId(val[0]);
+  if (typeof val === 'object' && val.id) return val.id;
+  return String(val);
+}
+
+async function hashPassword(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 // ---------------------------------------------------------------- LOKAL
 const localAdapter = {
   mode: 'local',
 
-<<<<<<< HEAD
-  async verifyPassword(pw) {
-    return pw.trim() === EVENT.localPassword
-  },
-
-  async nameExists(name) {
-    const guests = await idb.allGuests()
-=======
   // ---- Wedding-Lookup ----
   async loadWeddingBySlug(slug) {
-    return idb.getWeddingBySlug(slug)
+    return idb.getWeddingBySlug(slug);
   },
 
   async createWedding(data) {
-    const wedding = { id: uid(), ...data, createdAt: Date.now() }
-    await idb.putWedding(wedding)
-    return wedding
+    const wedding = { id: uid(), ...data, createdAt: Date.now() };
+    await idb.putWedding(wedding);
+    return wedding;
   },
 
   async listMyWeddings(adminId) {
-    const all = await idb.allWeddings()
-    return all.filter((w) => w.owner_id === adminId)
+    const all = await idb.allWeddings();
+    return all.filter((w) => w.owner_id === adminId);
   },
 
   async checkSlugAvailable(slug) {
-    const existing = await idb.getWeddingBySlug(slug)
-    return !existing
+    const existing = await idb.getWeddingBySlug(slug);
+    return !existing;
   },
 
   async getWeddingStats(weddingId) {
-    const guests = await idb.guestsByWedding(weddingId)
-    const photos = await idb.photosByWedding(weddingId)
-    return { guestCount: guests.length, photoCount: photos.length }
+    const guests = await idb.guestsByWedding(weddingId);
+    const photos = await idb.photosByWedding(weddingId);
+    return { guestCount: guests.length, photoCount: photos.length };
   },
 
   // ---- Admin Auth ----
-  async adminRegister(username, email, password) {
-    const existing = await idb.getAdminByUsername(username.toLowerCase())
-    if (existing) throw new Error('Username bereits vergeben')
-    const admin = { id: uid(), username: username.toLowerCase(), email, password, createdAt: Date.now() }
-    await idb.putAdmin(admin)
-    return { id: admin.id, username: admin.username, email: admin.email }
-  },
 
   async adminLogin(username, password) {
-    const admin = await idb.getAdminByUsername(username.toLowerCase())
-    if (!admin || admin.password !== password) return null
-    return { id: admin.id, username: admin.username, email: admin.email }
+    const { data, error } = await supabase.rpc('admin_login', {
+      p_username: username,
+      p_password: password,
+    });
+    if (error) throw error;
+    if (!data) throw new Error('Ungültiger Benutzername oder Passwort');
+    if (data.error) throw new Error(data.error);
+    if (!data.id) throw new Error('Ungültiger Benutzername oder Passwort');
+    return { id: data.id, username: data.username, email: data.email };
+  },
+
+  async adminRegister(username, email, password) {
+    const { data, error } = await supabase.rpc('admin_register', {
+      p_username: username,
+      p_email: email,
+      p_password: password,
+    });
+    if (error) throw error;
+    if (!data || data.error) throw new Error(data?.error || 'Registrierung fehlgeschlagen');
+    if (!data.id) throw new Error('Registrierung fehlgeschlagen');
+    return { id: data.id, username: data.username, email: data.email };
   },
 
   async checkUsernameAvailable(username) {
-    const existing = await idb.getAdminByUsername(username.toLowerCase())
-    return !existing
+    const existing = await idb.getAdminByUsername(username.toLowerCase());
+    return !existing;
   },
 
   // ---- Guest Flow ----
   async verifyPassword(pw) {
-    return pw.trim() === (activeWedding.localPassword || 'liebe2026')
+    return pw.trim() === (activeWedding.localPassword || 'liebe2026');
   },
 
   async nameExists(name) {
-    const guests = await idb.guestsByWedding(activeWedding.id)
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    return guests.some((g) => norm(g.name) === norm(name))
+    const guests = await idb.guestsByWedding(activeWedding.id);
+    return guests.some((g) => norm(g.name) === norm(name));
   },
 
   async joinAsGuest(name) {
-<<<<<<< HEAD
-    const guest = { id: uid(), name: name.trim(), createdAt: Date.now() }
-=======
-    const guest = { id: uid(), weddingId: activeWedding.id, name: name.trim(), createdAt: Date.now() }
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    await idb.putGuest(guest)
-    return guest
+    const guest = {
+      id: uid(),
+      weddingId: activeWedding.id,
+      name: name.trim(),
+      createdAt: Date.now(),
+    };
+    await idb.putGuest(guest);
+    return guest;
   },
 
   async savePhoto({ guestId, guestName, blob }) {
-<<<<<<< HEAD
-    const rec = { id: uid(), guestId, guestName, blob, takenAt: Date.now() }
-=======
-    const rec = { id: uid(), weddingId: activeWedding.id, guestId, guestName, blob, takenAt: Date.now() }
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    await idb.putPhoto(rec)
-    return { id: rec.id, takenAt: rec.takenAt }
+    const rec = {
+      id: uid(),
+      weddingId: activeWedding.id,
+      guestId,
+      guestName,
+      blob,
+      takenAt: Date.now(),
+    };
+    await idb.putPhoto(rec);
+    return { id: rec.id, takenAt: rec.takenAt };
   },
 
   async listMyPhotos(guestId) {
-    const rows = await idb.photosByGuest(guestId)
+    const rows = await idb.photosByGuest(guestId);
     return rows
-<<<<<<< HEAD
-=======
       .filter((r) => r.weddingId === activeWedding.id)
->>>>>>> cef553901371bf220774623f8c092096541acc20
       .sort((a, b) => a.takenAt - b.takenAt)
-      .map((r) => ({ id: r.id, takenAt: r.takenAt, url: URL.createObjectURL(r.blob) }))
+      .map((r) => ({ id: r.id, takenAt: r.takenAt, url: URL.createObjectURL(r.blob) }));
   },
 
-<<<<<<< HEAD
-  // Album-Vorschau (auch vor Reveal): Name + Cover + Anzahl
   async listAlbums() {
-    const rows = await idb.allPhotos()
-=======
-  async listAlbums() {
-    const rows = await idb.photosByWedding(activeWedding.id)
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    const map = new Map()
+    const rows = await idb.photosByWedding(activeWedding.id);
+    const map = new Map();
     for (const r of rows.sort((a, b) => a.takenAt - b.takenAt)) {
-      if (!map.has(r.guestName)) map.set(r.guestName, { guestName: r.guestName, cover: r.blob, count: 0 })
-      map.get(r.guestName).count++
+      if (!map.has(r.guestName))
+        map.set(r.guestName, { guestName: r.guestName, cover: r.blob, count: 0 });
+      map.get(r.guestName).count++;
     }
     return [...map.values()]
       .map((a) => ({ guestName: a.guestName, count: a.count, cover: URL.createObjectURL(a.cover) }))
-      .sort((a, b) => a.guestName.localeCompare(b.guestName))
+      .sort((a, b) => a.guestName.localeCompare(b.guestName));
   },
 
   async listByGuest() {
-<<<<<<< HEAD
-    const rows = await idb.allPhotos()
-=======
-    const rows = await idb.photosByWedding(activeWedding.id)
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    const map = new Map()
+    const rows = await idb.photosByWedding(activeWedding.id);
+    const map = new Map();
     for (const r of rows) {
-      if (!map.has(r.guestName)) map.set(r.guestName, [])
-      map.get(r.guestName).push({ id: r.id, takenAt: r.takenAt, url: URL.createObjectURL(r.blob) })
+      if (!map.has(r.guestName)) map.set(r.guestName, []);
+      map.get(r.guestName).push({ id: r.id, takenAt: r.takenAt, url: URL.createObjectURL(r.blob) });
     }
     return [...map.entries()]
-      .map(([guestName, photos]) => ({ guestName, photos: photos.sort((a, b) => a.takenAt - b.takenAt) }))
-      .sort((a, b) => a.guestName.localeCompare(b.guestName))
+      .map(([guestName, photos]) => ({
+        guestName,
+        photos: photos.sort((a, b) => a.takenAt - b.takenAt),
+      }))
+      .sort((a, b) => a.guestName.localeCompare(b.guestName));
   },
 
   // ---- Voting ----
   async myVotes(guestId) {
-    const rows = await idb.votesByGuest(guestId)
-<<<<<<< HEAD
-    return rows.map((r) => r.photoId)
+    const rows = await idb.votesByGuest(guestId);
+    return rows.filter((r) => r.weddingId === activeWedding.id).map((r) => r.photoId);
   },
   async addVote(guestId, photoId) {
-    await idb.putVote({ id: `${guestId}__${photoId}`, guestId, photoId, createdAt: Date.now() })
-=======
-    return rows.filter((r) => r.weddingId === activeWedding.id).map((r) => r.photoId)
-  },
-  async addVote(guestId, photoId) {
-    await idb.putVote({ id: `${guestId}__${photoId}`, weddingId: activeWedding.id, guestId, photoId, createdAt: Date.now() })
->>>>>>> cef553901371bf220774623f8c092096541acc20
+    await idb.putVote({
+      id: `${guestId}__${photoId}`,
+      weddingId: activeWedding.id,
+      guestId,
+      photoId,
+      createdAt: Date.now(),
+    });
   },
   async removeVote(guestId, photoId) {
-    await idb.delVote(`${guestId}__${photoId}`)
+    await idb.delVote(`${guestId}__${photoId}`);
   },
   async voteCounts() {
-<<<<<<< HEAD
-    const rows = await idb.allVotes()
-=======
-    const rows = await idb.votesByWedding(activeWedding.id)
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    const m = {}
-    for (const r of rows) m[r.photoId] = (m[r.photoId] || 0) + 1
-    return m
+    const rows = await idb.votesByWedding(activeWedding.id);
+    const m = {};
+    for (const r of rows) m[r.photoId] = (m[r.photoId] || 0) + 1;
+    return m;
   },
-}
+};
 
 // ------------------------------------------------------------- SUPABASE
-const BUCKET = 'photos'
+const BUCKET = 'photos';
 const supabaseAdapter = {
   mode: 'supabase',
 
-<<<<<<< HEAD
-  async verifyPassword(pw) {
-    const { data, error } = await supabase.rpc('verify_event_password', {
-      p_event_id: EVENT.id, p_password: pw.trim(),
-=======
   // ---- Wedding-Lookup ----
   async loadWeddingBySlug(slug) {
     const { data, error } = await supabase
       .from('weddings_public')
-      .select('id, slug, name, couple_a, couple_b, date, shoot_start, shoot_end, reveal_at, voting_enabled, voting_ends_at, max_shots, filter_id, color_scheme')
+      .select(
+        'id, slug, name, couple_a, couple_b, date, shoot_start, shoot_end, reveal_at, voting_enabled, voting_ends_at, max_shots, filter_id, color_scheme',
+      )
       .eq('slug', slug)
-      .single()
-    if (error) return null
-    return data
+      .single();
+    if (error) return null;
+    return data;
   },
 
   async createWedding(data) {
@@ -214,184 +219,207 @@ const supabaseAdapter = {
       p_filter_id: data.filter_id || DEFAULTS.filterId,
       p_color_scheme: data.color_scheme || DEFAULTS.colorScheme,
       p_password: data.password,
-      p_owner_id: data.owner_id,
-    })
-    if (error) throw error
-    return { id, ...data }
+      p_owner_id: extractId(data.owner_id),
+    });
+    if (error) throw error;
+    return { id, ...data };
   },
 
   async listMyWeddings(adminId) {
     const { data, error } = await supabase
       .from('wedding_admins')
       .select('wedding_id')
-      .eq('admin_id', adminId)
-    if (error) throw error
-    if (!data.length) return []
-    const ids = data.map((r) => r.wedding_id)
+      .eq('admin_id', extractId(adminId));
+    if (error) throw error;
+    if (!data.length) return [];
+    const ids = data.map((r) => r.wedding_id);
     const { data: weddings, error: e2 } = await supabase
       .from('weddings')
       .select('id, slug, name, couple_a, couple_b, date, max_shots, filter_id, color_scheme')
       .in('id', ids)
-      .order('date', { ascending: false })
-    if (e2) throw e2
-    return weddings || []
+      .order('date', { ascending: false });
+    if (e2) throw e2;
+    return weddings || [];
   },
 
   async checkSlugAvailable(slug) {
-    const { data, error } = await supabase.rpc('check_slug_available', { p_slug: slug })
-    if (error) throw error
-    return data === true
+    const { data, error } = await supabase.rpc('check_slug_available', { p_slug: slug });
+    if (error) throw error;
+    return data === true;
   },
 
   async getWeddingStats(weddingId) {
     const { count: guestCount } = await supabase
-      .from('guests').select('id', { count: 'exact', head: true }).eq('wedding_id', weddingId)
+      .from('guests')
+      .select('id', { count: 'exact', head: true })
+      .eq('wedding_id', weddingId);
     const { count: photoCount } = await supabase
-      .from('photos').select('id', { count: 'exact', head: true }).eq('wedding_id', weddingId)
-    return { guestCount: guestCount || 0, photoCount: photoCount || 0 }
+      .from('photos')
+      .select('id', { count: 'exact', head: true })
+      .eq('wedding_id', weddingId);
+    return { guestCount: guestCount || 0, photoCount: photoCount || 0 };
   },
 
   // ---- Admin Auth ----
   async adminRegister(username, email, password) {
     const { data, error } = await supabase.rpc('admin_register', {
-      p_username: username, p_email: email, p_password: password,
-    })
-    if (error) throw error
-    return { id: data, username, email }
+      p_username: username,
+      p_email: email,
+      p_password: password,
+    });
+    if (error) throw error;
+    const id = extractId(data);
+    if (!id) throw new Error('Registrierung fehlgeschlagen.');
+    return { id, username: data?.username || username, email: data?.email || email };
   },
 
   async adminLogin(username, password) {
     const { data, error } = await supabase.rpc('admin_login', {
-      p_username: username, p_password: password,
-    })
-    if (error) throw error
-    return data
+      p_username: username,
+      p_password: password,
+    });
+    if (error) throw error;
+    if (!data) throw new Error('Ungültige Zugangsdaten');
+    const id = extractId(data);
+    if (!id) throw new Error('Ungültige Zugangsdaten');
+    return { id, username: data?.username || username, email: data?.email || null };
   },
 
   async checkUsernameAvailable(username) {
-    const { data, error } = await supabase.rpc('check_username_available', { p_username: username })
-    if (error) throw error
-    return data === true
+    const { data, error } = await supabase.rpc('check_username_available', {
+      p_username: username,
+    });
+    if (error) throw error;
+    return data === true;
   },
 
   // ---- Guest Flow ----
   async verifyPassword(pw) {
     const { data, error } = await supabase.rpc('verify_wedding_password', {
-      p_wedding_id: activeWedding.id, p_password: pw.trim(),
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    })
-    if (error) throw error
-    return data === true
+      p_wedding_id: activeWedding.id,
+      p_password: pw.trim(),
+    });
+    if (error) throw error;
+    return data === true;
   },
 
   async nameExists(name) {
     const { data, error } = await supabase
-<<<<<<< HEAD
-      .from('guests').select('id').eq('event_id', EVENT.id).ilike('name', name.trim()).limit(1)
-=======
-      .from('guests').select('id').eq('wedding_id', activeWedding.id).ilike('name', name.trim()).limit(1)
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    if (error) throw error
-    return (data?.length || 0) > 0
+      .from('guests')
+      .select('id')
+      .eq('wedding_id', activeWedding.id)
+      .ilike('name', name.trim())
+      .limit(1);
+    if (error) throw error;
+    return (data?.length || 0) > 0;
   },
 
   async joinAsGuest(name) {
     const { data, error } = await supabase
-<<<<<<< HEAD
-      .from('guests').insert({ event_id: EVENT.id, name: name.trim() }).select('id, name').single()
-=======
-      .from('guests').insert({ wedding_id: activeWedding.id, name: name.trim() }).select('id, name').single()
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    if (error) throw error
-    return { id: data.id, name: data.name }
+      .from('guests')
+      .insert({ wedding_id: activeWedding.id, name: name.trim() })
+      .select('id, name')
+      .single();
+    if (error) throw error;
+    return { id: data.id, name: data.name };
   },
 
   async savePhoto({ guestId, guestName, blob }) {
-    const id = uid()
-    const safe = guestName.replace(/[^\p{L}\p{N}_-]+/gu, '_')
-<<<<<<< HEAD
-    const path = `${EVENT.id}/${safe}/${id}.jpg`
-    const up = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: false })
-    if (up.error) throw up.error
-    const { error } = await supabase.from('photos')
-      .insert({ id, event_id: EVENT.id, guest_id: guestId, guest_name: guestName, storage_path: path })
-=======
-    const path = `${activeWedding.id}/${safe}/${id}.jpg`
-    const up = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: false })
-    if (up.error) throw up.error
-    const { error } = await supabase.from('photos')
-      .insert({ id, wedding_id: activeWedding.id, guest_id: guestId, guest_name: guestName, storage_path: path })
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    if (error) throw error
-    return { id, takenAt: Date.now() }
+    const id = uid();
+    const safe = guestName.replace(/[^\p{L}\p{N}_-]+/gu, '_');
+    const path = `${activeWedding.id}/${safe}/${id}.jpg`;
+    const up = await supabase.storage
+      .from(BUCKET)
+      .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (up.error) throw up.error;
+    const { error } = await supabase
+      .from('photos')
+      .insert({
+        id,
+        wedding_id: activeWedding.id,
+        guest_id: guestId,
+        guest_name: guestName,
+        storage_path: path,
+      });
+    if (error) throw error;
+    return { id, takenAt: Date.now() };
   },
 
-  _url(path) { return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl },
+  _url(path) {
+    return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  },
 
   async listMyPhotos(guestId) {
     const { data, error } = await supabase
-      .from('photos').select('id, storage_path, created_at').eq('guest_id', guestId).order('created_at')
-    if (error) throw error
-    return data.map((r) => ({ id: r.id, takenAt: +new Date(r.created_at), url: this._url(r.storage_path) }))
+      .from('photos')
+      .select('id, storage_path, created_at')
+      .eq('guest_id', guestId)
+      .order('created_at');
+    if (error) throw error;
+    return data.map((r) => ({
+      id: r.id,
+      takenAt: +new Date(r.created_at),
+      url: this._url(r.storage_path),
+    }));
   },
 
   async listAlbums() {
-<<<<<<< HEAD
-    const { data, error } = await supabase.rpc('list_albums', { p_event_id: EVENT.id })
-=======
-    const { data, error } = await supabase.rpc('list_albums', { p_wedding_id: activeWedding.id })
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    if (error) throw error
-    return (data || []).map((a) => ({ guestName: a.guest_name, count: a.count, cover: this._url(a.cover_path) }))
+    const { data, error } = await supabase.rpc('list_albums', { p_wedding_id: activeWedding.id });
+    if (error) throw error;
+    return (data || []).map((a) => ({
+      guestName: a.guest_name,
+      count: a.count,
+      cover: this._url(a.cover_path),
+    }));
   },
 
   async listByGuest() {
     const { data, error } = await supabase
-<<<<<<< HEAD
-      .from('photos').select('id, guest_name, storage_path, created_at').eq('event_id', EVENT.id).order('created_at')
-=======
-      .from('photos').select('id, guest_name, storage_path, created_at').eq('wedding_id', activeWedding.id).order('created_at')
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    if (error) throw error
-    const map = new Map()
+      .from('photos')
+      .select('id, guest_name, storage_path, created_at')
+      .eq('wedding_id', activeWedding.id)
+      .order('created_at');
+    if (error) throw error;
+    const map = new Map();
     for (const r of data) {
-      if (!map.has(r.guest_name)) map.set(r.guest_name, [])
-      map.get(r.guest_name).push({ id: r.id, takenAt: +new Date(r.created_at), url: this._url(r.storage_path) })
+      if (!map.has(r.guest_name)) map.set(r.guest_name, []);
+      map
+        .get(r.guest_name)
+        .push({ id: r.id, takenAt: +new Date(r.created_at), url: this._url(r.storage_path) });
     }
     return [...map.entries()]
       .map(([guestName, photos]) => ({ guestName, photos }))
-      .sort((a, b) => a.guestName.localeCompare(b.guestName))
+      .sort((a, b) => a.guestName.localeCompare(b.guestName));
   },
 
-<<<<<<< HEAD
-=======
   // ---- Voting ----
->>>>>>> cef553901371bf220774623f8c092096541acc20
   async myVotes(guestId) {
-    const { data, error } = await supabase.from('votes').select('photo_id').eq('guest_id', guestId)
-    if (error) throw error
-    return data.map((r) => r.photo_id)
+    const { data, error } = await supabase.from('votes').select('photo_id').eq('guest_id', guestId);
+    if (error) throw error;
+    return data.map((r) => r.photo_id);
   },
   async addVote(guestId, photoId) {
-<<<<<<< HEAD
-    const { error } = await supabase.from('votes').insert({ event_id: EVENT.id, guest_id: guestId, photo_id: photoId })
-=======
-    const { error } = await supabase.from('votes').insert({ wedding_id: activeWedding.id, guest_id: guestId, photo_id: photoId })
->>>>>>> cef553901371bf220774623f8c092096541acc20
-    if (error) throw error
+    const { error } = await supabase
+      .from('votes')
+      .insert({ wedding_id: activeWedding.id, guest_id: guestId, photo_id: photoId });
+    if (error) throw error;
   },
   async removeVote(guestId, photoId) {
-    const { error } = await supabase.from('votes').delete().eq('guest_id', guestId).eq('photo_id', photoId)
-    if (error) throw error
+    const { error } = await supabase
+      .from('votes')
+      .delete()
+      .eq('guest_id', guestId)
+      .eq('photo_id', photoId);
+    if (error) throw error;
   },
   async voteCounts() {
-    const { data, error } = await supabase.from('vote_counts').select('photo_id, votes')
-    if (error) throw error
-    const m = {}
-    for (const r of data) m[r.photo_id] = r.votes
-    return m
+    const { data, error } = await supabase.from('vote_counts').select('photo_id, votes');
+    if (error) throw error;
+    const m = {};
+    for (const r of data) m[r.photo_id] = r.votes;
+    return m;
   },
-}
+};
 
-export const storage = hasSupabase ? supabaseAdapter : localAdapter
-export const STORAGE_MODE = storage.mode
+export const storage = hasSupabase ? supabaseAdapter : localAdapter;
+export const STORAGE_MODE = storage.mode;

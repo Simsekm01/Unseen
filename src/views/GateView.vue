@@ -1,27 +1,16 @@
 <script setup>
 import { ref } from 'vue'
-<<<<<<< HEAD
-import { useRouter } from 'vue-router'
-import { EVENT } from '../config.js'
-=======
 import { useRouter, useRoute } from 'vue-router'
 import { activeWedding } from '../config.js'
->>>>>>> cef553901371bf220774623f8c092096541acc20
 import { storage } from '../lib/storage.js'
 import { useSession } from '../stores/session.js'
 
 const router = useRouter()
-<<<<<<< HEAD
-const session = useSession()
-
-const step = ref('pw') // 'pw' | 'name' | 'distinguish'
-=======
 const route = useRoute()
 const session = useSession()
 const slug = route.params.slug
 
 const step = ref('pw')
->>>>>>> cef553901371bf220774623f8c092096541acc20
 const password = ref('')
 const name = ref('')
 const extra = ref('')
@@ -84,16 +73,12 @@ async function submitDistinguished() {
 
 async function join(finalName) {
   await session.join(finalName)
-<<<<<<< HEAD
-  router.replace('/shoot')
-=======
   router.replace(`/${slug}/shoot`)
 }
 
 function formatDate() {
   if (!activeWedding.date) return ''
   return activeWedding.date.toLocaleDateString('de-AT', { day: '2-digit', month: 'long', year: 'numeric' })
->>>>>>> cef553901371bf220774623f8c092096541acc20
 }
 </script>
 
@@ -101,22 +86,13 @@ function formatDate() {
   <main class="gate">
     <div class="top">
       <p class="eyebrow">Die Hochzeit von</p>
-<<<<<<< HEAD
-      <h1 class="names script">Kaycee &amp; Mustafa</h1>
-      <p class="date stamp">{{ EVENT.weddingDate.toLocaleDateString('de-AT', { day: '2-digit', month: 'long', year: 'numeric' }) }}</p>
-=======
       <h1 class="names script">{{ activeWedding.coupleA }} &amp; {{ activeWedding.coupleB }}</h1>
       <p class="date stamp">{{ formatDate() }}</p>
->>>>>>> cef553901371bf220774623f8c092096541acc20
     </div>
 
     <div class="card">
       <template v-if="step === 'pw'">
-<<<<<<< HEAD
-        <p class="lead">36 Aufnahmen für dich. Fang die schönsten Momente ein — entwickelt werden alle Bilder nach der Feier.</p>
-=======
         <p class="lead">{{ activeWedding.maxShots }} Aufnahmen für dich. Fang die schönsten Momente ein — entwickelt werden alle Bilder nach der Feier.</p>
->>>>>>> cef553901371bf220774623f8c092096541acc20
         <input class="field" v-model="password" type="password" placeholder="Passwort" autocomplete="off" @keyup.enter="checkPassword" />
         <button class="btn" :disabled="busy || !password" @click="checkPassword">Weiter</button>
       </template>
@@ -132,20 +108,11 @@ function formatDate() {
           <strong>{{ name }}</strong> gibt es schon. Gib bitte noch etwas dazu, damit dein Album eindeutig ist.
         </p>
         <input class="field" v-model="extra" type="text" placeholder="z.B. Nachname oder Tischnummer" @keyup.enter="submitDistinguished" />
-<<<<<<< HEAD
-        <button class="btn" :disabled="busy" @click="submitDistinguished">Weiter als „{{ name }} {{ extra }}“</button>
-=======
         <button class="btn" :disabled="busy" @click="submitDistinguished">Weiter als „{{ name }} {{ extra }}"</button>
->>>>>>> cef553901371bf220774623f8c092096541acc20
       </template>
 
       <p v-if="error" class="err">{{ error }}</p>
     </div>
-<<<<<<< HEAD
-
-    <RouterLink to="/host" class="hostlink stamp">Für die Organisation →</RouterLink>
-=======
->>>>>>> cef553901371bf220774623f8c092096541acc20
   </main>
 </template>
 
@@ -170,8 +137,4 @@ function formatDate() {
   background: rgba(169, 96, 63, 0.14); color: var(--clay);
   font-style: normal; font-family: var(--font-label); font-size: 0.9rem;
 }
-<<<<<<< HEAD
-.hostlink { text-align: center; text-decoration: none; font-size: 0.75rem; opacity: 0.8; }
-=======
->>>>>>> cef553901371bf220774623f8c092096541acc20
 </style>

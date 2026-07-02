@@ -1,16 +1,4 @@
 <script setup>
-<<<<<<< HEAD
-defineProps({
-  left: { type: Number, required: true },
-  total: { type: Number, required: true },
-})
-</script>
-
-<template>
-  <div class="counter">
-    <span class="digits">{{ left }}</span>
-    <span class="of stamp">/ {{ total }}</span>
-=======
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -34,17 +22,10 @@ const low = computed(() => props.left <= 3 && props.left > 0)
         :stroke-dashoffset="offset" />
     </svg>
     <span class="num">{{ left }}</span>
->>>>>>> cef553901371bf220774623f8c092096541acc20
   </div>
 </template>
 
 <style scoped>
-<<<<<<< HEAD
-.counter { display: inline-flex; align-items: baseline; gap: 0.35rem;
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.9rem; }
-.digits { font-family: var(--font-serif); font-style: italic; font-weight: 600; font-size: 1.8rem; color: var(--clay); line-height: 1; }
-.of { font-size: 0.72rem; }
-=======
 .arc-counter {
   position: relative;
   width: 56px; height: 56px;
@@ -93,5 +74,4 @@ const low = computed(() => props.left <= 3 && props.left > 0)
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.08); }
 }
->>>>>>> cef553901371bf220774623f8c092096541acc20
 </style>

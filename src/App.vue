@@ -4,11 +4,7 @@ import { useRoute } from 'vue-router'
 import AppNav from './components/AppNav.vue'
 
 const route = useRoute()
-<<<<<<< HEAD
-const showNav = computed(() => !route.meta.bare)
-=======
 const showNav = computed(() => !route.meta.bare && route.params.slug)
->>>>>>> cef553901371bf220774623f8c092096541acc20
 </script>
 
 <template>

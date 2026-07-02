@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-// db.js — IndexedDB-Wrapper fuer den LOKALEN Modus.
-const DB_NAME = 'km-disposable'
-const DB_VERSION = 2
-=======
 const DB_NAME = 'unseen-platform'
 const DB_VERSION = 3
->>>>>>> cef553901371bf220774623f8c092096541acc20
 
 let dbPromise = null
 
@@ -15,14 +9,6 @@ function open() {
     const req = indexedDB.open(DB_NAME, DB_VERSION)
     req.onupgradeneeded = () => {
       const db = req.result
-<<<<<<< HEAD
-      if (!db.objectStoreNames.contains('photos')) {
-        const s = db.createObjectStore('photos', { keyPath: 'id' })
-        s.createIndex('guestId', 'guestId', { unique: false })
-      }
-      if (!db.objectStoreNames.contains('guests')) {
-        db.createObjectStore('guests', { keyPath: 'id' })
-=======
       if (!db.objectStoreNames.contains('weddings')) {
         const ws = db.createObjectStore('weddings', { keyPath: 'id' })
         ws.createIndex('slug', 'slug', { unique: true })
@@ -39,16 +25,12 @@ function open() {
       if (!db.objectStoreNames.contains('guests')) {
         const gs = db.createObjectStore('guests', { keyPath: 'id' })
         gs.createIndex('weddingId', 'weddingId', { unique: false })
->>>>>>> cef553901371bf220774623f8c092096541acc20
       }
       if (!db.objectStoreNames.contains('votes')) {
         const v = db.createObjectStore('votes', { keyPath: 'id' })
         v.createIndex('guestId', 'guestId', { unique: false })
         v.createIndex('photoId', 'photoId', { unique: false })
-<<<<<<< HEAD
-=======
         v.createIndex('weddingId', 'weddingId', { unique: false })
->>>>>>> cef553901371bf220774623f8c092096541acc20
       }
     }
     req.onsuccess = () => resolve(req.result)
@@ -69,8 +51,6 @@ function getAll(store, index, key) {
       }),
   )
 }
-<<<<<<< HEAD
-=======
 
 function getOne(store, key) {
   return open().then(
@@ -96,7 +76,6 @@ function getByIndex(store, index, key) {
   )
 }
 
->>>>>>> cef553901371bf220774623f8c092096541acc20
 function put(store, value) {
   return open().then(
     (db) =>
@@ -108,10 +87,7 @@ function put(store, value) {
       }),
   )
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> cef553901371bf220774623f8c092096541acc20
 function del(store, key) {
   return open().then(
     (db) =>
@@ -125,13 +101,6 @@ function del(store, key) {
 }
 
 export const idb = {
-<<<<<<< HEAD
-  putGuest: (g) => put('guests', g),
-  allGuests: () => getAll('guests'),
-  putPhoto: (p) => put('photos', p),
-  allPhotos: () => getAll('photos'),
-  photosByGuest: (guestId) => getAll('photos', 'guestId', guestId),
-=======
   // Weddings
   putWedding: (w) => put('weddings', w),
   getWedding: (id) => getOne('weddings', id),
@@ -156,13 +125,9 @@ export const idb = {
   photosByWedding: (weddingId) => getAll('photos', 'weddingId', weddingId),
 
   // Votes
->>>>>>> cef553901371bf220774623f8c092096541acc20
   putVote: (v) => put('votes', v),
   delVote: (id) => del('votes', id),
   allVotes: () => getAll('votes'),
   votesByGuest: (guestId) => getAll('votes', 'guestId', guestId),
-<<<<<<< HEAD
-=======
   votesByWedding: (weddingId) => getAll('votes', 'weddingId', weddingId),
->>>>>>> cef553901371bf220774623f8c092096541acc20
 }

@@ -1,43 +1,13 @@
-<<<<<<< HEAD
-import { createRouter, createWebHashHistory } from 'vue-router'
-import { useSession } from '../stores/session.js'
-
-=======
 import { createRouter, createWebHistory } from 'vue-router'
 import { useSession } from '../stores/session.js'
 import { useAdmin } from '../stores/admin.js'
 
 import LandingView from '../views/LandingView.vue'
 import WeddingShell from '../views/WeddingShell.vue'
->>>>>>> cef553901371bf220774623f8c092096541acc20
 import GateView from '../views/GateView.vue'
 import ShootView from '../views/ShootView.vue'
 import RollView from '../views/RollView.vue'
 import GalleryView from '../views/GalleryView.vue'
-<<<<<<< HEAD
-import GamesView from '../views/GamesView.vue'
-import VoteGame from '../views/VoteGame.vue'
-import HostView from '../views/HostView.vue'
-
-const g = { requiresGuest: true }
-const routes = [
-  { path: '/', name: 'gate', component: GateView, meta: { bare: true } },
-  { path: '/shoot', component: ShootView, meta: g },
-  { path: '/roll', component: RollView, meta: g },
-  { path: '/gallery', component: GalleryView, meta: g },
-  { path: '/games', component: GamesView, meta: g },
-  { path: '/games/vote', component: VoteGame, meta: g },
-  { path: '/host', component: HostView, meta: { bare: true } },
-  { path: '/:catchAll(.*)', redirect: '/' },
-]
-
-const router = createRouter({ history: createWebHashHistory(), routes })
-
-router.beforeEach((to) => {
-  const session = useSession()
-  if (to.meta.requiresGuest && !session.joined) return { path: '/' }
-  if (to.path === '/' && session.joined) return { path: '/shoot' }
-=======
 import VoteGame from '../views/VoteGame.vue'
 import AdminLogin from '../views/admin/AdminLogin.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
@@ -85,7 +55,6 @@ router.beforeEach((to) => {
     }
   }
 
->>>>>>> cef553901371bf220774623f8c092096541acc20
   return true
 })
 

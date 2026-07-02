@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAdmin } from '../../stores/admin.js'
 import { storage } from '../../lib/storage.js'
 import { FILTERS } from '../../lib/filters.js'
 import { COLOR_SCHEMES } from '../../lib/colorSchemes.js'
 import QRCode from 'qrcode'
 
 const route = useRoute()
+const admin = useAdmin()
 const weddingId = route.params.id
 const wedding = ref(null)
 const stats = ref({ guestCount: 0, photoCount: 0 })
@@ -19,7 +21,7 @@ function appUrl() {
 
 onMounted(async () => {
   try {
-    const all = await storage.listMyWeddings(null)
+    const all = await storage.listMyWeddings(admin.adminId)
     wedding.value = all.find((w) => w.id === weddingId) || null
     if (wedding.value) {
       stats.value = await storage.getWeddingStats(weddingId)

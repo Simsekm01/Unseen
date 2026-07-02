@@ -1,15 +1,16 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import { copyFileSync } from 'fs';
 
-<<<<<<< HEAD
-// HTTPS hinweis: getUserMedia (Kamera) braucht https oder localhost.
-// Lokal laeuft alles ueber localhost -> passt. Beim Deploy unbedingt https.
-=======
->>>>>>> cef553901371bf220774623f8c092096541acc20
 export default defineConfig({
-  plugins: [vue()],
-  server: {
-    host: true,
-    port: 5173,
-  },
-})
+  plugins: [
+    vue(),
+    {
+      name: 'copy-netlify-toml',
+      closeBundle() {
+        copyFileSync('netlify.toml', 'dist/netlify.toml');
+      },
+    },
+  ],
+});
